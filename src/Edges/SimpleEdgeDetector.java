@@ -7,8 +7,17 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-public class SimpleEdgeDetection {
-    public static JLabel run(String filename, int limit) {
+public class SimpleEdgeDetector {
+
+    private String filename;
+    private int limit;
+
+    public SimpleEdgeDetector(String filename, int limit) {
+        this.filename = filename;
+        this.limit = limit;
+    }
+
+    public JLabel detectEdges() {
         BufferedImage img = null;
         BufferedImage outputImg = null;
         File f;
@@ -28,12 +37,10 @@ public class SimpleEdgeDetection {
                     int black=new Color(0,0,0).getRGB();
                     int white = new Color(255, 255, 255).getRGB();
                     // Compare the current pixel's color intensity to the pixel to the right.
-                    int diff1 =  Math.abs(color1.getBlue() + color1.getGreen() + color1.getRed() + color1.getAlpha()
-                            - color2.getGreen() -color2.getBlue() - color2.getRed() - color2.getAlpha());
+                    int diff1 =  Math.abs(EdgeDetection.getIntensity(color1) - EdgeDetection.getIntensity(color2));
                     // Compare the current pixel's color intensity to the pixel below.
-                    int diff2 =  Math.abs(color1.getBlue() + color1.getGreen() + color1.getRed() + color1.getAlpha()
-                            - color3.getGreen() -color3.getBlue() - color3.getRed() - color3.getAlpha());
-                    if (diff1 > limit || diff2 > limit) outputImg.setRGB(i, j, white);
+                    int diff2 =  Math.abs(EdgeDetection.getIntensity(color1) - EdgeDetection.getIntensity(color3));
+                    if (Math.sqrt(Math.pow(diff1, 2)  + Math.pow(diff2, 2)) > limit) outputImg.setRGB(i, j, white);
                     else outputImg.setRGB(i, j, black);
                 }
             }
@@ -42,15 +49,8 @@ public class SimpleEdgeDetection {
         catch(IOException e){
             System.out.println(e);
         }
-        Image resizedImg = resize(outputImg);
+        Image resizedImg = EdgeDetection.resize(outputImg);
         return new JLabel(new ImageIcon(resizedImg));
-    }
-
-    private static Image resize(BufferedImage img) {
-        if (img.getHeight() > 300 || img.getWidth() > 600) {
-            return img.getScaledInstance(img.getWidth()/2, img.getHeight()/2, Image.SCALE_SMOOTH);
-        }
-        return img;
     }
 }
 
